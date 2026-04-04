@@ -38,7 +38,7 @@ export function LandingNav() {
 
       {/* Mobile Drawer Overlay */}
       <div 
-        className={`md:hidden fixed inset-0 bg-[#06080D]/95 backdrop-blur-3xl z-40 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] flex flex-col items-center justify-center space-y-8 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`md:hidden fixed inset-0 bg-[#06080D]/95 backdrop-blur-3xl z-40 transition-all duration-500 ease-in-out flex flex-col items-center justify-center space-y-8 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
       >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1E3A8A]/10 via-transparent to-transparent -z-10"></div>
         <Link href="#how-it-works" onClick={() => setIsOpen(false)} className="text-xl font-black tracking-widest text-[#E2E8F0] uppercase hover:text-[#60A5FA] transition-colors">HOW IT WORKS</Link>
