@@ -7,6 +7,10 @@ import React, { useEffect, useRef, useState } from 'react';
 
 // Route: /(public)/page.tsx
 
+const HERO_LINE_ONE = 'Stop Guessing.';
+const HERO_LINE_TWO = 'Start finishing.';
+const HERO_FULL_TEXT = `${HERO_LINE_ONE}${HERO_LINE_TWO}`;
+
 function SpaceBackgroundCanvas() {
    const canvasRef = useRef<HTMLCanvasElement>(null);
    const starsRef = useRef<Array<{ x: number; y: number; z: number; opacity: number }>>([]);
@@ -94,9 +98,6 @@ export default function LandingPage() {
    const shellRef = useRef<HTMLDivElement>(null);
    const [heroReady, setHeroReady] = useState(false);
    const [typedCount, setTypedCount] = useState(0);
-   const heroLineOne = 'Stop Guessing.';
-   const heroLineTwo = 'Start finishing.';
-   const heroFullText = `${heroLineOne}${heroLineTwo}`;
 
    useEffect(() => {
       const shell = shellRef.current;
@@ -150,7 +151,7 @@ export default function LandingPage() {
    useEffect(() => {
       if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
          setHeroReady(true);
-         setTypedCount(heroFullText.length);
+         setTypedCount(HERO_FULL_TEXT.length);
          return;
       }
 
@@ -163,11 +164,11 @@ export default function LandingPage() {
 
    useEffect(() => {
       if (!heroReady) return;
-      if (typedCount >= heroFullText.length) return;
+      if (typedCount >= HERO_FULL_TEXT.length) return;
 
       const interval = window.setInterval(() => {
          setTypedCount((prev) => {
-            if (prev >= heroFullText.length) {
+            if (prev >= HERO_FULL_TEXT.length) {
                window.clearInterval(interval);
                return prev;
             }
@@ -176,10 +177,10 @@ export default function LandingPage() {
       }, 42);
 
       return () => window.clearInterval(interval);
-   }, [heroReady, typedCount, heroFullText.length]);
+   }, [heroReady, typedCount]);
 
-   const typedLineOne = heroFullText.slice(0, Math.min(typedCount, heroLineOne.length));
-   const typedLineTwo = heroFullText.slice(heroLineOne.length, typedCount);
+   const typedLineOne = HERO_FULL_TEXT.slice(0, Math.min(typedCount, HERO_LINE_ONE.length));
+   const typedLineTwo = HERO_FULL_TEXT.slice(HERO_LINE_ONE.length, typedCount);
 
   return (
       <div ref={shellRef} className="landing-shell min-h-screen bg-[#020408] text-white selection:bg-blue-500/30 font-sans relative overflow-x-hidden">
@@ -206,7 +207,7 @@ export default function LandingPage() {
                      {typedLineOne}
                      <br/>
                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#94A3B8]">{typedLineTwo}</span>
-                     {heroReady && typedCount < heroFullText.length && <span className="hero-typing-caret" aria-hidden="true" />}
+                     {heroReady && typedCount < HERO_FULL_TEXT.length && <span className="hero-typing-caret" aria-hidden="true" />}
             </h1>
             <p className={`text-lg md:text-xl text-[#94A3B8] max-w-3xl font-medium mb-12 leading-relaxed mx-auto drop-shadow-md transition-opacity duration-700 delay-200 ${heroReady ? 'opacity-100' : 'opacity-0'}`}>
                When everything feels important the wrong things get done.<br className="hidden md:inline"/> Poddesk takes your plans or ideas and uses system thinking to<br className="hidden md:inline"/> build the right sequence so you can finish what matters.
