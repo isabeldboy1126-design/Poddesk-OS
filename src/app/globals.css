@@ -1,0 +1,224 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --landing-scroll: 0px;
+}
+
+@layer base {
+  body {
+    background-color: theme('colors.background');
+    color: theme('colors.foreground');
+  }
+}
+
+@keyframes landingDriftSlow {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -8px, 0) scale(1.01); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes landingDriftMedium {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -12px, 0) scale(1.012); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes landingStarsFast {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -14px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes landingStarsSlow {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes landingDustShift {
+  0% { transform: translate3d(0, 0, 0); opacity: 0.28; }
+  50% { transform: translate3d(0, -10px, 0); opacity: 0.4; }
+  100% { transform: translate3d(0, 0, 0); opacity: 0.28; }
+}
+
+@keyframes heroPodFlyIn {
+  0% { opacity: 0; transform: translate3d(-36vw, 0, 0) scale(0.9); }
+  12% { opacity: 1; }
+  58% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  100% { opacity: 0; transform: translate3d(8vw, -4px, 0) scale(0.98); }
+}
+
+@keyframes heroCaretBlink {
+  0%, 48% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@layer components {
+  .landing-shell {
+    isolation: isolate;
+  }
+
+  .hero-pod-intro {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    animation: heroPodFlyIn 1.35s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  }
+
+  .hero-pod-pill {
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 9999px;
+    padding: 0.46rem 0.95rem;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(15, 23, 42, 0.65));
+    color: #e2e8f0;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2), 0 8px 24px rgba(15, 23, 42, 0.45);
+  }
+
+  .hero-typing-caret {
+    display: inline-block;
+    width: 0.08em;
+    height: 0.92em;
+    margin-left: 0.06em;
+    background: #e2e8f0;
+    vertical-align: -0.08em;
+    animation: heroCaretBlink 0.9s steps(1, end) infinite;
+  }
+
+  .landing-nebula-depth {
+    background:
+      radial-gradient(1100px 540px at 16% 15%, rgba(30, 58, 138, 0.24), transparent 60%),
+      radial-gradient(1000px 600px at 85% 22%, rgba(15, 23, 42, 0.38), transparent 65%),
+      radial-gradient(900px 500px at 50% 88%, rgba(3, 8, 20, 0.72), transparent 72%);
+    transform: translate3d(0, calc(var(--landing-scroll) * -0.045), 0);
+    will-change: transform;
+  }
+
+  .landing-vignette {
+    background: radial-gradient(ellipse at center, rgba(2, 4, 8, 0) 0%, rgba(2, 4, 8, 0.58) 68%, rgba(2, 4, 8, 0.86) 100%);
+  }
+
+  .landing-star-layer-fast {
+    transform: translate3d(0, calc(var(--landing-scroll) * -0.03), 0);
+    animation: landingStarsFast 22s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .landing-star-layer-slow {
+    transform: translate3d(0, calc(var(--landing-scroll) * -0.018), 0);
+    animation: landingStarsSlow 28s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .landing-dust-layer {
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(148, 163, 184, 0.2) 0 1px, transparent 2px),
+      radial-gradient(circle at 72% 42%, rgba(147, 197, 253, 0.14) 0 1.4px, transparent 2px),
+      radial-gradient(circle at 40% 72%, rgba(255, 255, 255, 0.12) 0 1px, transparent 2px);
+    background-size: 340px 340px, 520px 520px, 420px 420px;
+    background-repeat: repeat;
+    mix-blend-mode: screen;
+    animation: landingDustShift 26s ease-in-out infinite;
+    transform: translate3d(0, calc(var(--landing-scroll) * -0.014), 0);
+    will-change: transform, opacity;
+  }
+
+  .landing-reveal {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    transition: opacity 760ms ease, transform 760ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .landing-reveal--visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .landing-float-slow {
+    animation: landingDriftSlow 8.8s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .landing-float-medium {
+    animation: landingDriftMedium 10.5s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .landing-surface {
+    backdrop-filter: blur(1.2px);
+    box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.06), 0 18px 48px rgba(2, 6, 23, 0.34);
+    transition: box-shadow 260ms ease, transform 260ms ease, border-color 260ms ease;
+  }
+
+  .landing-surface:hover {
+    border-color: rgba(100, 116, 139, 0.9);
+    box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.12), 0 22px 55px rgba(2, 6, 23, 0.42);
+  }
+
+  .landing-cta {
+    transition: transform 220ms ease, box-shadow 220ms ease, filter 220ms ease, background-color 220ms ease, border-color 220ms ease;
+  }
+
+  .landing-cta:hover {
+    filter: brightness(1.04);
+    box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.22), 0 12px 34px rgba(30, 64, 175, 0.34);
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-star-layer-fast,
+  .landing-star-layer-slow,
+  .landing-dust-layer {
+    animation-duration: 34s;
+    opacity: 0.72;
+  }
+
+  .landing-float-slow,
+  .landing-float-medium {
+    animation-duration: 13s;
+  }
+
+  .landing-nebula-depth {
+    transform: translate3d(0, calc(var(--landing-scroll) * -0.02), 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-pod-intro {
+    display: none !important;
+    animation: none !important;
+  }
+
+  .hero-typing-caret {
+    animation: none !important;
+  }
+
+  .landing-star-layer-fast,
+  .landing-star-layer-slow,
+  .landing-dust-layer,
+  .landing-float-slow,
+  .landing-float-medium {
+    animation: none !important;
+  }
+
+  .landing-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .landing-nebula-depth,
+  .landing-star-layer-fast,
+  .landing-star-layer-slow,
+  .landing-dust-layer {
+    transform: none;
+  }
+}
