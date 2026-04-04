@@ -263,7 +263,7 @@ export default function LandingPage() {
                        <span className="w-6 h-6 rounded-full bg-[#450a0a] flex items-center justify-center text-[#FCA5A5] text-xs font-black shrink-0">!</span> 
                        Context Fragmentation
                     </h4>
-                    <p className="text-sm text-[#94A3B8]">Losing the 'why' while buried in the 'how' across infinite sub-tasks.</p>
+                    <p className="text-sm text-[#94A3B8]">Losing the &apos;why&apos; while buried in the &apos;how&apos; across infinite sub-tasks.</p>
                  </div>
               </div>
            </div>
@@ -283,7 +283,7 @@ export default function LandingPage() {
                  </div>
                  
                  <div className="absolute bottom-4 -left-4 md:-left-8 landing-surface landing-float-slow bg-[#162032] border border-[#334155] p-6 rounded-xl max-w-[320px] shadow-2xl z-10">
-                    <p className="text-[13px] md:text-sm text-[#E2E8F0] font-medium italic mb-4 leading-relaxed">"The biggest blocker to progress isn't lack of time, but the friction of starting."</p>
+                    <p className="text-[13px] md:text-sm text-[#E2E8F0] font-medium italic mb-4 leading-relaxed">&quot;The biggest blocker to progress isn&apos;t lack of time, but the friction of starting.&quot;</p>
                     <p className="text-[9px] uppercase tracking-widest text-[#64748B] font-bold">THE EXECUTION PARADOX</p>
                  </div>
               </div>
@@ -343,7 +343,7 @@ export default function LandingPage() {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
                  </div>
                  <h3 className="font-bold text-white mb-4 text-xl tracking-tight">2. Get a Clear Sequence</h3>
-                 <p className="text-[15px] text-[#94A3B8] leading-relaxed">Our engine architecturally maps your inputs into a logical, high-impact sequence. We handle the "how".</p>
+                 <p className="text-[15px] text-[#94A3B8] leading-relaxed">Our engine architecturally maps your inputs into a logical, high-impact sequence. We handle the &quot;how&quot;.</p>
               </div>
               <div className="landing-surface landing-float-slow [animation-delay:0.7s] bg-[#0A0E17] border border-[#1E293B] p-10 rounded-3xl hover:border-[#334155] transition-colors relative overflow-hidden group">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-colors"></div>
@@ -358,28 +358,28 @@ export default function LandingPage() {
 
         {/* Philosophy Section */}
       <section data-reveal id="philosophy" className="landing-reveal max-w-[1200px] mx-auto px-4 py-32 text-center border-t border-[#1E293B]/50">
-           <h2 className="text-4xl font-extrabold text-white mb-16">"Clarity creates action"</h2>
+           <h2 className="text-4xl font-extrabold text-white mb-16">&quot;Clarity creates action&quot;</h2>
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div className="landing-surface landing-float-slow bg-[#0F172A]/40 border border-[#1E293B] p-10 rounded-3xl flex flex-col items-center hover:bg-[#0F172A] transition-colors">
                  <div className="text-[#60A5FA] mb-6 w-12 h-12 flex items-center justify-center">
                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                  </div>
                  <h3 className="font-bold text-[#F1F5F9] mb-4 text-lg">Clarity reduces hesitation</h3>
-                 <p className="text-[13px] text-[#94A3B8] italic leading-relaxed">"When the path is illuminated, the legs move automatically. We remove the fog."</p>
+                 <p className="text-[13px] text-[#94A3B8] italic leading-relaxed">&quot;When the path is illuminated, the legs move automatically. We remove the fog.&quot;</p>
               </div>
               <div className="landing-surface landing-float-slow [animation-delay:0.35s] bg-[#0F172A]/40 border border-[#1E293B] p-10 rounded-3xl flex flex-col items-center hover:bg-[#0F172A] transition-colors">
                  <div className="text-[#60A5FA] mb-6 w-12 h-12 flex items-center justify-center">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                  </div>
                  <h3 className="font-bold text-[#F1F5F9] mb-4 text-lg">Sequence removes decision fatigue</h3>
-                 <p className="text-[13px] text-[#94A3B8] italic leading-relaxed">"The order of operations is as critical as the work itself. We solve the logic of order."</p>
+                 <p className="text-[13px] text-[#94A3B8] italic leading-relaxed">&quot;The order of operations is as critical as the work itself. We solve the logic of order.&quot;</p>
               </div>
               <div className="landing-surface landing-float-slow [animation-delay:0.7s] bg-[#0F172A]/40 border border-[#1E293B] p-10 rounded-3xl flex flex-col items-center hover:bg-[#0F172A] transition-colors">
                  <div className="text-[#60A5FA] mb-6 w-12 h-12 flex items-center justify-center">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
                  </div>
                  <h3 className="font-bold text-[#F1F5F9] mb-4 text-lg">Visible progress builds momentum</h3>
-                 <p className="text-[13px] text-[#94A3B8] italic leading-relaxed">"Execution is a flywheel. Every small step taken increases the torque for the next."</p>
+                 <p className="text-[13px] text-[#94A3B8] italic leading-relaxed">&quot;Execution is a flywheel. Every small step taken increases the torque for the next.&quot;</p>
               </div>
            </div>
         </section>
