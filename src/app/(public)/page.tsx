@@ -217,7 +217,7 @@ export default function LandingPage() {
                      </div>
                   )}
 
-                  <h1 className={`text-[2.6rem] md:text-8xl font-black tracking-tighter text-white mb-5 leading-[1.03] drop-shadow-[0_0_40px_rgba(255,255,255,0.1)] transition-all duration-700 ${heroReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
+                  <h1 className={`text-[3rem] md:text-8xl font-black tracking-tighter text-white mb-6 leading-tight drop-shadow-[0_0_40px_rgba(255,255,255,0.1)] transition-all duration-700 ${heroReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
                      <span className="block whitespace-nowrap">{typedLineOne}</span>
                      <br/>
                      <span className="block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#94A3B8]">{typedLineTwo}</span>
