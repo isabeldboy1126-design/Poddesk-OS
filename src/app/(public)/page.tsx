@@ -217,10 +217,10 @@ export default function LandingPage() {
                      </div>
                   )}
 
-                  <h1 className={`text-6xl md:text-8xl font-black tracking-tighter text-white mb-6 leading-tight drop-shadow-[0_0_40px_rgba(255,255,255,0.1)] transition-all duration-700 ${heroReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
-                     {typedLineOne}
+                  <h1 className={`text-[2.6rem] md:text-8xl font-black tracking-tighter text-white mb-5 leading-[1.03] drop-shadow-[0_0_40px_rgba(255,255,255,0.1)] transition-all duration-700 ${heroReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
+                     <span className="block whitespace-nowrap">{typedLineOne}</span>
                      <br/>
-                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#94A3B8]">{typedLineTwo}</span>
+                     <span className="block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#94A3B8]">{typedLineTwo}</span>
                      {heroReady && typedCount < HERO_FULL_TEXT.length && <span className="hero-typing-caret" aria-hidden="true" />}
             </h1>
             <p className={`text-lg md:text-xl text-[#94A3B8] max-w-3xl font-medium mb-12 leading-relaxed mx-auto drop-shadow-md transition-opacity duration-700 delay-200 ${heroReady ? 'opacity-100' : 'opacity-0'}`}>
@@ -340,7 +340,7 @@ export default function LandingPage() {
 
         {/* How It Works Section */}
       <section data-reveal id="how-it-works" className="landing-reveal max-w-[1200px] mx-auto px-4 py-32 text-center border-t border-[#1E293B]/50">
-           <h2 className="text-3xl font-bold text-white mb-16">How it materializes</h2>
+           <h2 className="text-3xl font-bold text-white mb-16">How it works</h2>
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
               <div className="landing-surface landing-float-slow bg-[#0A0E17] border border-[#1E293B] p-10 rounded-3xl hover:border-[#334155] transition-colors relative overflow-hidden group">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-colors"></div>
@@ -348,7 +348,7 @@ export default function LandingPage() {
                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
                  </div>
                  <h3 className="font-bold text-white mb-4 text-xl tracking-tight">1. Dump Everything</h3>
-                 <p className="text-[15px] text-[#94A3B8] leading-relaxed">Start with raw chaos. Voice notes, messy bullet points, or complex spreadsheets. No structure required.</p>
+                 <p className="text-[15px] text-[#94A3B8] leading-relaxed">Start with raw input: plain ideas, messy bullet points, complex spreadsheets, or overwhelming plans. No structure required.</p>
               </div>
               <div className="landing-surface landing-float-slow [animation-delay:0.35s] bg-[#0A0E17] border border-[#1E293B] p-10 rounded-3xl hover:border-[#334155] transition-colors relative overflow-hidden group">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-colors"></div>
