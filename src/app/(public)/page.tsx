@@ -49,7 +49,7 @@ function SpaceBackgroundCanvas() {
 
       const animate = () => {
          const now = Date.now();
-         ctx.fillStyle = 'rgba(15, 23, 42, 0.1)';
+         ctx.fillStyle = 'rgba(15, 23, 42, 1)';
          ctx.fillRect(0, 0, canvas.width, canvas.height);
 
          starsRef.current.forEach((star) => {
