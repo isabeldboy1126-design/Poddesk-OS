@@ -321,8 +321,7 @@ export default function FocusPage({
       const data = (await res.json()) as Partial<UnstuckResponse> & { error?: string; details?: string };
 
       if (!res.ok) {
-        const detail = [data.error, data.details].filter(Boolean).join(' ');
-        setUnstuckError(detail || 'Get Unstuck request failed.');
+        setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
         setUnstuckStage('choice');
         return;
       }
@@ -340,7 +339,7 @@ export default function FocusPage({
       );
 
       if (!isValid) {
-        setUnstuckError('Malformed AI output: response did not match required schema.');
+        setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
         setUnstuckStage('choice');
         return;
       }
@@ -354,7 +353,7 @@ export default function FocusPage({
       });
       setUnstuckStage('result');
     } catch (err) {
-      setUnstuckError((err as Error)?.message || 'Get Unstuck request failed.');
+      setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
       setUnstuckStage('choice');
     }
   }, [activeNode, flowId]);

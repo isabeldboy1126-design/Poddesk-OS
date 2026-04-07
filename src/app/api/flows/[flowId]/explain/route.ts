@@ -88,7 +88,7 @@ export async function POST(
 
         const client = new GoogleGenerativeAI(apiKey);
         const model = client.getGenerativeModel({
-          model: 'gemini-2.0-flash',
+          model: 'gemini-2.5-flash',
           generationConfig: {
             temperature: 0.2,
             maxOutputTokens: 700,
@@ -201,7 +201,7 @@ Return ONLY valid JSON in this exact schema:
 
       const client = new GoogleGenerativeAI(apiKey);
       const model = client.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.5-flash',
         generationConfig: { temperature: 0.3, maxOutputTokens: 512 },
       });
 
