@@ -3,6 +3,7 @@
 import { CountUp } from "@/components/ui/CountUp";
 import { LandingNav } from "@/components/layout/LandingNav";
 import Link from 'next/link';
+import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 
 // Route: /(public)/page.tsx
@@ -13,8 +14,9 @@ const HERO_FULL_TEXT = `${HERO_LINE_ONE}${HERO_LINE_TWO}`;
 
 function SpaceBackgroundCanvas() {
    const canvasRef = useRef<HTMLCanvasElement>(null);
-   const starsRef = useRef<Array<{ x: number; y: number; z: number; opacity: number }>>([]);
+   const starsRef = useRef<Array<{ x: number; y: number; z: number; opacity: number; driftX: number; driftY: number; phase: number }>>([]);
    const rafRef = useRef<number | null>(null);
+   const isMobileRef = useRef(false);
 
    useEffect(() => {
       const canvas = canvasRef.current;
@@ -26,40 +28,53 @@ function SpaceBackgroundCanvas() {
       const resize = () => {
          canvas.width = window.innerWidth;
          canvas.height = window.innerHeight;
+         isMobileRef.current = window.innerWidth <= 768;
       };
 
       resize();
       window.addEventListener('resize', resize);
 
       starsRef.current = [];
-      for (let i = 0; i < 200; i += 1) {
+      for (let i = 0; i < 160; i += 1) {
          starsRef.current.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
             z: Math.random() * 1000,
             opacity: Math.random() * 0.5 + 0.3,
+            driftX: (Math.random() - 0.5) * 0.06,
+            driftY: (Math.random() - 0.5) * 0.04,
+            phase: Math.random() * Math.PI * 2,
          });
       }
 
-      let scrollY = 0;
-      const onScroll = () => {
-         scrollY = window.scrollY;
-      };
-
-      window.addEventListener('scroll', onScroll, { passive: true });
-
       const animate = () => {
+         const now = Date.now();
          ctx.fillStyle = 'rgba(15, 23, 42, 0.1)';
          ctx.fillRect(0, 0, canvas.width, canvas.height);
 
          starsRef.current.forEach((star) => {
-            star.y += 0.1 + scrollY * 0.0001;
-            star.opacity += Math.sin(Date.now() * 0.001 + star.x) * 0.01;
-            star.opacity = Math.max(0.2, Math.min(0.8, star.opacity));
+            const floatX = Math.sin(now * 0.00018 + star.phase) * 0.018;
+            const floatY = Math.cos(now * 0.00016 + star.phase) * 0.014;
+            star.x += star.driftX + floatX;
+            star.y += star.driftY + floatY;
 
-            if (star.y > canvas.height + 50) {
-               star.y = -50;
-               star.x = Math.random() * canvas.width;
+            star.opacity = 0.34 + Math.sin(now * 0.0009 + star.phase) * 0.16;
+            star.opacity = Math.max(0.2, Math.min(0.75, star.opacity));
+
+            if (star.x > canvas.width + 20) star.x = -20;
+            if (star.x < -20) star.x = canvas.width + 20;
+            if (star.y > canvas.height + 20) star.y = -20;
+            if (star.y < -20) star.y = canvas.height + 20;
+
+            const inMobileHeroZone =
+               isMobileRef.current &&
+               star.y < canvas.height * 0.38 &&
+               star.x > canvas.width * 0.14 &&
+               star.x < canvas.width * 0.86;
+
+            // Thin only a small portion of stars around the mobile hero copy for readability.
+            if (inMobileHeroZone && star.phase > 5.2) {
+               return;
             }
 
             const radius = (star.z / 1000) * 2;
@@ -84,7 +99,6 @@ function SpaceBackgroundCanvas() {
 
       return () => {
          window.removeEventListener('resize', resize);
-         window.removeEventListener('scroll', onScroll);
          if (rafRef.current) {
             window.cancelAnimationFrame(rafRef.current);
          }
@@ -272,16 +286,14 @@ export default function LandingPage() {
            <div className="flex-1 relative w-full">
               <div className="landing-surface landing-float-medium aspect-[4/5] md:aspect-[4/3] bg-gradient-to-tr from-[#0F172A] to-[#1E293B] rounded-3xl overflow-hidden relative shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center border border-[#334155]">
                  <div className="absolute inset-0 bg-black/40 mix-blend-overlay"></div>
-                 {/* Visual placeholder for the developer looking at screens from reference */}
-                 <div className="absolute inset-0 bg-blue-900/10 backdrop-blur-[2px]"></div>
-                 <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-[80%] h-[60%] border border-[#334155]/50 bg-[#020617]/50 rounded-lg shadow-2xl relative overflow-hidden flex divide-x divide-[#1E293B]">
-                        <div className="flex-1 border-r border-[#1E293B]"></div>
-                        <div className="flex-1"></div>
-                        <div className="flex-1 border-l border-[#1E293B]"></div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent"></div>
-                    </div>
-                 </div>
+                 <Image
+                    src="/problem-blocker-scene.png"
+                    alt="Focused person at desk with multiple monitor screens"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                 />
+                 <div className="absolute inset-0 bg-blue-900/10 backdrop-blur-[1px]"></div>
                  
                  <div className="absolute bottom-4 -left-4 md:-left-8 landing-surface landing-float-slow bg-[#162032] border border-[#334155] p-6 rounded-xl max-w-[320px] shadow-2xl z-10">
                     <p className="text-[13px] md:text-sm text-[#E2E8F0] font-medium italic mb-4 leading-relaxed">&quot;The biggest blocker to progress isn&apos;t lack of time, but the friction of starting.&quot;</p>
