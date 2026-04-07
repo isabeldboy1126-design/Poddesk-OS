@@ -25,6 +25,22 @@ type FocusState =
   | 'flow_complete'
   | 'error';
 
+type UnstuckBlockType =
+  | 'none'
+  | 'dont_know_how_to_start'
+  | 'waiting_on_something'
+  | 'task_feels_too_big';
+
+type UnstuckStage = 'closed' | 'choice' | 'context' | 'loading' | 'result';
+
+interface UnstuckResponse {
+  what_is_blocking_you: string;
+  do_this_now: string;
+  smallest_possible_step: string;
+  avoid_this: string;
+  done_looks_like: string;
+}
+
 export default function FocusPage({
   params,
 }: {
@@ -43,6 +59,11 @@ export default function FocusPage({
   const [explanation, setExplanation] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
+  const [unstuckStage, setUnstuckStage] = useState<UnstuckStage>('closed');
+  const [unstuckBlockType, setUnstuckBlockType] = useState<UnstuckBlockType>('none');
+  const [unstuckContext, setUnstuckContext] = useState('');
+  const [unstuckResult, setUnstuckResult] = useState<UnstuckResponse | null>(null);
+  const [unstuckError, setUnstuckError] = useState<string | null>(null);
   const [completionData, setCompletionData] = useState<{
     milestone: string | null;
     completedCount: number;
@@ -260,6 +281,83 @@ export default function FocusPage({
     }
   }, [activeNode, flowId, isLoadingExplanation]);
 
+  // Reset staged unstuck state when active task changes
+  useEffect(() => {
+    setUnstuckStage('closed');
+    setUnstuckBlockType('none');
+    setUnstuckContext('');
+    setUnstuckResult(null);
+    setUnstuckError(null);
+  }, [activeNode?.id]);
+
+  const closeUnstuck = useCallback(() => {
+    setUnstuckStage('closed');
+    setUnstuckBlockType('none');
+    setUnstuckContext('');
+    setUnstuckResult(null);
+    setUnstuckError(null);
+  }, []);
+
+  const requestUnstuck = useCallback(async (
+    blockType: UnstuckBlockType,
+    contextText: string
+  ) => {
+    if (!activeNode) return;
+    setUnstuckError(null);
+    setUnstuckStage('loading');
+
+    try {
+      const res = await fetch(`/api/flows/${flowId}/explain`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'unstuck_v2',
+          nodeId: activeNode.id,
+          userBlockType: blockType,
+          userContext: contextText.trim() || undefined,
+        }),
+      });
+
+      const data = (await res.json()) as Partial<UnstuckResponse>;
+
+      const fields: Array<keyof UnstuckResponse> = [
+        'what_is_blocking_you',
+        'do_this_now',
+        'smallest_possible_step',
+        'avoid_this',
+        'done_looks_like',
+      ];
+
+      const isValid = res.ok && fields.every(
+        (k) => typeof data[k] === 'string' && (data[k] as string).trim().length > 0
+      );
+
+      if (!isValid) {
+        setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
+        setUnstuckStage('choice');
+        return;
+      }
+
+      if ((data.what_is_blocking_you as string).includes('Get Unstuck is unavailable right now')) {
+        setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
+        setUnstuckStage('choice');
+        return;
+      }
+
+      setUnstuckResult({
+        what_is_blocking_you: (data.what_is_blocking_you as string).trim(),
+        do_this_now: (data.do_this_now as string).trim(),
+        smallest_possible_step: (data.smallest_possible_step as string).trim(),
+        avoid_this: (data.avoid_this as string).trim(),
+        done_looks_like: (data.done_looks_like as string).trim(),
+      });
+      setUnstuckStage('result');
+    } catch {
+      setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
+      setUnstuckStage('choice');
+    }
+  }, [activeNode, flowId]);
+
   // ─── Exit Warning ───
   const handleBackClick = () => {
     if (focusState === 'active' || focusState === 'overrun') {
@@ -285,10 +383,7 @@ export default function FocusPage({
   const handleGetUnstuck = () => {
     overrunDismissedRef.current = true;
     setFocusState('active');
-    setShowExplanation(true);
-    if (!explanation) {
-      handleExplainStep();
-    }
+    setUnstuckStage('choice');
   };
 
   const handleSkipForNow = () => {
@@ -483,10 +578,7 @@ export default function FocusPage({
         {/* Get Unstuck floating button */}
         <div className="fixed right-6 top-1/2 -translate-y-1/2 z-30">
           <button
-            onClick={() => {
-              setShowExplanation(true);
-              if (!explanation) handleExplainStep();
-            }}
+            onClick={() => setUnstuckStage('choice')}
             className="flex flex-col items-center gap-1.5 bg-[#1E293B] hover:bg-[#283548] border border-[#334155] rounded-xl px-3 py-3 text-gray-400 hover:text-blue-400 transition-all shadow-lg"
             title="Get unstuck"
           >
@@ -498,6 +590,122 @@ export default function FocusPage({
             <span className="text-[9px] font-bold tracking-wider uppercase">Get<br />Unstuck</span>
           </button>
         </div>
+
+        {unstuckStage !== 'closed' && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4">
+            <div className="w-full max-w-xl rounded-2xl border border-[#334155] bg-[#0F172A]/95 backdrop-blur-xl p-6 shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm md:text-base font-bold tracking-wide text-white uppercase">Get Unstuck</h3>
+                <button
+                  onClick={closeUnstuck}
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="Close Get Unstuck"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+
+              {unstuckError && (
+                <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+                  {unstuckError}
+                </div>
+              )}
+
+              {unstuckStage === 'choice' && (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-300">Choose how you want recovery help for this task.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      onClick={() => requestUnstuck('none', '')}
+                      className="rounded-xl border border-[#334155] bg-[#1E293B] px-4 py-3 text-sm font-semibold text-white hover:bg-[#283548] transition-colors"
+                    >
+                      Proceed
+                    </button>
+                    <button
+                      onClick={() => setUnstuckStage('context')}
+                      className="rounded-xl border border-[#334155] bg-[#1E293B] px-4 py-3 text-sm font-semibold text-white hover:bg-[#283548] transition-colors"
+                    >
+                      Add Context
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {unstuckStage === 'context' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-2">
+                    <button
+                      onClick={() => setUnstuckBlockType('dont_know_how_to_start')}
+                      className={`rounded-lg border px-3 py-2 text-sm text-left transition-colors ${unstuckBlockType === 'dont_know_how_to_start' ? 'border-blue-400 bg-blue-500/20 text-white' : 'border-[#334155] bg-[#111827] text-gray-300 hover:bg-[#1f2937]'}`}
+                    >
+                      I don&apos;t know how to start
+                    </button>
+                    <button
+                      onClick={() => setUnstuckBlockType('waiting_on_something')}
+                      className={`rounded-lg border px-3 py-2 text-sm text-left transition-colors ${unstuckBlockType === 'waiting_on_something' ? 'border-blue-400 bg-blue-500/20 text-white' : 'border-[#334155] bg-[#111827] text-gray-300 hover:bg-[#1f2937]'}`}
+                    >
+                      I&apos;m waiting on something
+                    </button>
+                    <button
+                      onClick={() => setUnstuckBlockType('task_feels_too_big')}
+                      className={`rounded-lg border px-3 py-2 text-sm text-left transition-colors ${unstuckBlockType === 'task_feels_too_big' ? 'border-blue-400 bg-blue-500/20 text-white' : 'border-[#334155] bg-[#111827] text-gray-300 hover:bg-[#1f2937]'}`}
+                    >
+                      This task feels too big
+                    </button>
+                  </div>
+
+                  <textarea
+                    value={unstuckContext}
+                    onChange={(e) => setUnstuckContext(e.target.value)}
+                    rows={3}
+                    placeholder="Optional: add brief context"
+                    className="w-full rounded-lg border border-[#334155] bg-[#111827] px-3 py-2 text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/60"
+                  />
+
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => setUnstuckStage('choice')}
+                      className="rounded-lg border border-[#334155] bg-[#111827] px-3 py-2 text-sm text-gray-300 hover:bg-[#1f2937]"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={() => requestUnstuck(unstuckBlockType, unstuckContext)}
+                      className="rounded-lg border border-blue-500/50 bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {unstuckStage === 'loading' && (
+                <div className="py-8 text-center text-sm text-gray-300">Generating a recovery path...</div>
+              )}
+
+              {unstuckStage === 'result' && unstuckResult && (
+                <div className="space-y-3 text-sm">
+                  <ResultRow label="What is blocking you" value={unstuckResult.what_is_blocking_you} />
+                  <ResultRow label="Do this now" value={unstuckResult.do_this_now} />
+                  <ResultRow label="Smallest possible step" value={unstuckResult.smallest_possible_step} />
+                  <ResultRow label="Avoid this" value={unstuckResult.avoid_this} />
+                  <ResultRow label="Done looks like" value={unstuckResult.done_looks_like} />
+                  <div className="flex justify-end pt-2">
+                    <button
+                      onClick={closeUnstuck}
+                      className="rounded-lg border border-[#334155] bg-[#111827] px-3 py-2 text-sm text-gray-200 hover:bg-[#1f2937]"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </FlowContainer>
     );
   }
@@ -511,5 +719,14 @@ export default function FocusPage({
         </div>
       </div>
     </FlowContainer>
+  );
+}
+
+function ResultRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-[#334155] bg-[#111827]/60 p-3">
+      <p className="text-[11px] uppercase tracking-wider text-gray-400 mb-1">{label}</p>
+      <p className="text-gray-200 leading-relaxed">{value}</p>
+    </div>
   );
 }
