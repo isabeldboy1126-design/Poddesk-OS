@@ -7,6 +7,7 @@ interface ActiveTaskCardProps {
   node: Node;
   totalNodes: number;
   completedCount: number;
+  breadcrumb?: string | null;
   onMarkComplete: () => void;
   onPause: () => void;
   onExplainStep: () => void;
@@ -21,6 +22,7 @@ export function ActiveTaskCard({
   node,
   totalNodes,
   completedCount,
+  breadcrumb,
   onMarkComplete,
   onPause,
   onExplainStep,
@@ -63,6 +65,15 @@ export function ActiveTaskCard({
       <div className="bg-[#121A2F]/60 border border-[#1E293B] rounded-xl p-1 mb-8">
         {/* Sub-items / task details */}
         <div className="space-y-0">
+          {breadcrumb && (
+            <div className="px-5 py-4 rounded-lg border border-blue-400/30 bg-blue-500/10">
+              <p className="text-[10px] font-bold tracking-[0.16em] text-blue-300 uppercase mb-1">
+                Restart Point
+              </p>
+              <p className="text-sm text-blue-100 leading-relaxed">{breadcrumb}</p>
+            </div>
+          )}
+
           {/* Description row */}
           {node.description && (
             <div className="flex items-center gap-4 px-5 py-4 rounded-lg">

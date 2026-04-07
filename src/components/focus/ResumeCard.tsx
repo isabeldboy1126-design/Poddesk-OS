@@ -9,6 +9,7 @@ interface ResumeCardProps {
   activeNode: Node;
   remainingCount: number;
   totalElapsedMs: number;
+  breadcrumb?: string | null;
   onResume: () => void;
   isResuming: boolean;
 }
@@ -18,6 +19,7 @@ export function ResumeCard({
   activeNode,
   remainingCount,
   totalElapsedMs,
+  breadcrumb,
   onResume,
   isResuming,
 }: ResumeCardProps) {
@@ -72,6 +74,15 @@ export function ResumeCard({
             </p>
           </div>
         </div>
+
+        {breadcrumb && (
+          <div className="mb-6 rounded-xl border border-blue-400/30 bg-blue-500/10 px-4 py-3 text-left">
+            <p className="text-[10px] font-bold tracking-[0.16em] text-blue-300 uppercase mb-1">
+              Exact Restart Point
+            </p>
+            <p className="text-sm text-blue-100 leading-relaxed">{breadcrumb}</p>
+          </div>
+        )}
 
         {/* Resume CTA */}
         <button

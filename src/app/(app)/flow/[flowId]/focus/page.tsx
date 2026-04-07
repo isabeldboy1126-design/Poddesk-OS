@@ -41,6 +41,8 @@ interface UnstuckResponse {
   done_looks_like: string;
 }
 
+type PauseIntent = 'pause' | 'leave';
+
 export default function FocusPage({
   params,
 }: {
@@ -64,6 +66,9 @@ export default function FocusPage({
   const [unstuckContext, setUnstuckContext] = useState('');
   const [unstuckResult, setUnstuckResult] = useState<UnstuckResponse | null>(null);
   const [unstuckError, setUnstuckError] = useState<string | null>(null);
+  const [pauseIntent, setPauseIntent] = useState<PauseIntent | null>(null);
+  const [breadcrumbDraft, setBreadcrumbDraft] = useState('');
+  const [activeBreadcrumb, setActiveBreadcrumb] = useState<string | null>(null);
   const [completionData, setCompletionData] = useState<{
     milestone: string | null;
     completedCount: number;
@@ -96,6 +101,35 @@ export default function FocusPage({
     lastResumedAt: activeNode?.last_resumed_at || null,
     estimatedMs: activeNode?.estimated_duration_ms || null,
   });
+
+  const getBreadcrumbStorageKey = useCallback(
+    (nodeId: string) => `poddesk:breadcrumb:${flowId}:${nodeId}`,
+    [flowId]
+  );
+
+  const loadBreadcrumbForNode = useCallback(
+    (nodeId: string) => {
+      try {
+        const value = window.localStorage.getItem(getBreadcrumbStorageKey(nodeId));
+        return value && value.trim().length > 0 ? value : null;
+      } catch {
+        return null;
+      }
+    },
+    [getBreadcrumbStorageKey]
+  );
+
+  const saveBreadcrumbForNode = useCallback(
+    (nodeId: string, note: string) => {
+      try {
+        window.localStorage.setItem(getBreadcrumbStorageKey(nodeId), note);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [getBreadcrumbStorageKey]
+  );
 
   // ─── Data Fetching ───
   const fetchData = useCallback(async () => {
@@ -148,6 +182,15 @@ export default function FocusPage({
     })();
   }, [fetchData, flowId, router]);
 
+  useEffect(() => {
+    if (!activeNode) {
+      setActiveBreadcrumb(null);
+      return;
+    }
+
+    setActiveBreadcrumb(loadBreadcrumbForNode(activeNode.id));
+  }, [activeNode, loadBreadcrumbForNode]);
+
   // ─── Overrun Detection ───
   useEffect(() => {
     if (
@@ -179,7 +222,7 @@ export default function FocusPage({
   }, [flowId, fetchData]);
 
   // ─── Pause ───
-  const handlePause = useCallback(async () => {
+  const pauseActiveNode = useCallback(async () => {
     if (!activeNode) return;
     try {
       await fetch(`/api/flows/${flowId}/nodes/${activeNode.id}`, {
@@ -188,11 +231,74 @@ export default function FocusPage({
         body: JSON.stringify({ action: 'pause' }),
       });
       await fetchData();
-      setFocusState('paused');
+      return true;
     } catch (err: unknown) {
       console.error('Pause failed:', err);
+      return false;
     }
   }, [activeNode, flowId, fetchData]);
+
+  const openPausePrompt = useCallback(
+    (intent: PauseIntent) => {
+      if (!activeNode) {
+        if (intent === 'leave') {
+          router.push('/dashboard');
+        }
+        return;
+      }
+
+      setPauseIntent(intent);
+      setBreadcrumbDraft(activeBreadcrumb || '');
+    },
+    [activeNode, activeBreadcrumb, router]
+  );
+
+  const closePausePrompt = useCallback(() => {
+    setPauseIntent(null);
+    setBreadcrumbDraft('');
+  }, []);
+
+  const continuePauseOrLeave = useCallback(async (
+    intent: PauseIntent,
+    mode: 'save' | 'skip'
+  ) => {
+    if (!activeNode) {
+      closePausePrompt();
+      return;
+    }
+
+    const trimmed = breadcrumbDraft.trim();
+    if (mode === 'save' && trimmed.length > 0) {
+      const saved = saveBreadcrumbForNode(activeNode.id, trimmed);
+      if (saved) {
+        setActiveBreadcrumb(trimmed);
+      }
+    }
+
+    closePausePrompt();
+
+    if (intent === 'pause') {
+      const paused = await pauseActiveNode();
+      if (paused) {
+        setFocusState('paused');
+      }
+      return;
+    }
+
+    setIsLeaving(true);
+    if (activeNode && !isTimerPaused) {
+      await pauseActiveNode();
+    }
+    router.push('/dashboard');
+  }, [
+    activeNode,
+    breadcrumbDraft,
+    closePausePrompt,
+    isTimerPaused,
+    pauseActiveNode,
+    router,
+    saveBreadcrumbForNode,
+  ]);
 
   // ─── Resume ───
   const handleResume = useCallback(async () => {
@@ -367,18 +473,6 @@ export default function FocusPage({
     }
   };
 
-  const handleLeave = async () => {
-    setIsLeaving(true);
-    if (activeNode && !isTimerPaused) {
-      await fetch(`/api/flows/${flowId}/nodes/${activeNode.id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'pause' }),
-      });
-    }
-    router.push('/dashboard');
-  };
-
   // ─── Overrun actions ───
   const handleGetUnstuck = () => {
     overrunDismissedRef.current = true;
@@ -458,6 +552,7 @@ export default function FocusPage({
           activeNode={activeNode}
           remainingCount={remainingCount}
           totalElapsedMs={totalElapsedMs}
+          breadcrumb={activeBreadcrumb}
           onResume={handleResume}
           isResuming={isResuming}
         />
@@ -474,6 +569,7 @@ export default function FocusPage({
           activeNode={activeNode}
           remainingCount={remainingCount}
           totalElapsedMs={totalElapsedMs}
+          breadcrumb={activeBreadcrumb}
           onResume={handleResume}
           isResuming={isResuming}
         />
@@ -542,9 +638,53 @@ export default function FocusPage({
           completedCount={completedCount}
           totalCount={nodes.length}
           onStayFocused={() => setFocusState('active')}
-          onLeave={handleLeave}
+          onLeave={() => openPausePrompt('leave')}
           isLeaving={isLeaving}
         />
+        {pauseIntent && activeNode && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+            <div className="w-full max-w-lg rounded-2xl border border-[#334155] bg-[#0F172A]/95 backdrop-blur-xl p-5 shadow-2xl">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <h3 className="text-sm md:text-base font-bold tracking-wide text-white uppercase">Breadcrumb Pause</h3>
+                <button
+                  onClick={closePausePrompt}
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="Close breadcrumb prompt"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-sm text-gray-300 mb-3">
+                What is the exact next tiny thing you need to do when you get back?
+              </p>
+              <textarea
+                value={breadcrumbDraft}
+                onChange={(e) => setBreadcrumbDraft(e.target.value)}
+                rows={3}
+                maxLength={220}
+                placeholder="Example: Open notes and write the first 3 bullet points for section 2"
+                className="w-full rounded-lg border border-[#334155] bg-[#111827] px-3 py-2 text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/60"
+              />
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <button
+                  onClick={() => continuePauseOrLeave(pauseIntent, 'skip')}
+                  className="rounded-lg border border-[#334155] bg-[#111827] px-3 py-2 text-sm text-gray-300 hover:bg-[#1f2937]"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={() => continuePauseOrLeave(pauseIntent, 'save')}
+                  className="rounded-lg border border-blue-500/50 bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500"
+                >
+                  {pauseIntent === 'leave' ? 'Save & Leave' : 'Save & Pause'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     );
   }
@@ -561,8 +701,9 @@ export default function FocusPage({
                 node={activeNode}
                 totalNodes={nodes.length}
                 completedCount={completedCount}
+                breadcrumb={activeBreadcrumb}
                 onMarkComplete={handleMarkComplete}
-                onPause={handlePause}
+                onPause={() => openPausePrompt('pause')}
                 onExplainStep={handleExplainStep}
                 isCompleting={isCompleting}
                 explanation={explanation}
@@ -709,6 +850,51 @@ export default function FocusPage({
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {pauseIntent && activeNode && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+            <div className="w-full max-w-lg rounded-2xl border border-[#334155] bg-[#0F172A]/95 backdrop-blur-xl p-5 shadow-2xl">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <h3 className="text-sm md:text-base font-bold tracking-wide text-white uppercase">Breadcrumb Pause</h3>
+                <button
+                  onClick={closePausePrompt}
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="Close breadcrumb prompt"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-sm text-gray-300 mb-3">
+                What is the exact next tiny thing you need to do when you get back?
+              </p>
+              <textarea
+                value={breadcrumbDraft}
+                onChange={(e) => setBreadcrumbDraft(e.target.value)}
+                rows={3}
+                maxLength={220}
+                placeholder="Example: Open notes and write the first 3 bullet points for section 2"
+                className="w-full rounded-lg border border-[#334155] bg-[#111827] px-3 py-2 text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/60"
+              />
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <button
+                  onClick={() => continuePauseOrLeave(pauseIntent, 'skip')}
+                  className="rounded-lg border border-[#334155] bg-[#111827] px-3 py-2 text-sm text-gray-300 hover:bg-[#1f2937]"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={() => continuePauseOrLeave(pauseIntent, 'save')}
+                  className="rounded-lg border border-blue-500/50 bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500"
+                >
+                  {pauseIntent === 'leave' ? 'Save & Leave' : 'Save & Pause'}
+                </button>
+              </div>
             </div>
           </div>
         )}
