@@ -41,10 +41,6 @@ export function LandingNav() {
         className={`md:hidden fixed inset-0 bg-[#06080D]/95 backdrop-blur-3xl z-40 transition-all duration-500 ease-in-out flex flex-col items-center justify-center space-y-8 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
       >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1E3A8A]/10 via-transparent to-transparent -z-10"></div>
-        <Link href="#how-it-works" onClick={() => setIsOpen(false)} className="text-xl font-black tracking-widest text-[#E2E8F0] uppercase hover:text-[#60A5FA] transition-colors">HOW IT WORKS</Link>
-        <Link href="#philosophy" onClick={() => setIsOpen(false)} className="text-xl font-black tracking-widest text-[#E2E8F0] uppercase hover:text-[#60A5FA] transition-colors">PHILOSOPHY</Link>
-        <Link href="#solutions" onClick={() => setIsOpen(false)} className="text-xl font-black tracking-widest text-[#E2E8F0] uppercase hover:text-[#60A5FA] transition-colors">SOLUTIONS</Link>
-        <div className="w-16 h-[1px] bg-[#334155] my-4"></div>
         <Link href="/login" onClick={() => setIsOpen(false)} className="text-lg font-bold tracking-widest text-[#94A3B8] uppercase hover:text-white transition-colors">SIGN IN</Link>
         <Link href="/brain-dump" onClick={() => setIsOpen(false)} className="px-10 py-5 mt-4 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white text-sm font-black tracking-widest uppercase rounded-xl shadow-[0_0_30px_rgba(59,130,246,0.3)] border border-[#60A5FA]/30">
           START FLOW

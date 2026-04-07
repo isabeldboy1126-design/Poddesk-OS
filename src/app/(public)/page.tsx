@@ -208,7 +208,7 @@ export default function LandingPage() {
 
       <main className="relative z-10">
         {/* Hero Section */}
-            <section data-reveal className="landing-reveal relative pt-48 pb-24 overflow-hidden flex flex-col items-center justify-center text-center max-w-6xl mx-auto px-4 perspective-1000">
+            <section data-reveal className="landing-reveal relative pt-44 md:pt-48 pb-24 overflow-hidden flex flex-col items-center justify-center text-center max-w-6xl mx-auto px-4 perspective-1000">
           
                <div className="relative mb-12 min-h-[12.5rem] md:min-h-[15.5rem] flex flex-col items-center justify-center">
                   {!heroReady && (
@@ -217,7 +217,7 @@ export default function LandingPage() {
                      </div>
                   )}
 
-                  <h1 className={`text-[3.6rem] md:text-8xl font-black tracking-tighter text-white mb-6 leading-[0.9] drop-shadow-[0_0_40px_rgba(255,255,255,0.1)] transition-all duration-700 ${heroReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
+                  <h1 className={`text-[3.6rem] md:text-8xl font-black tracking-tighter text-white mb-6 leading-[0.86] md:leading-[0.9] drop-shadow-[0_0_40px_rgba(255,255,255,0.1)] transition-all duration-700 ${heroReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
                      <span className="block whitespace-nowrap">{typedLineOne}</span>
                      <span className="block whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#94A3B8]">{typedLineTwo}</span>
                      {heroReady && typedCount < HERO_FULL_TEXT.length && <span className="hero-typing-caret" aria-hidden="true" />}
