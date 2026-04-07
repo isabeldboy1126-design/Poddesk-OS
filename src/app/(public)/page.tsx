@@ -8,7 +8,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 // Route: /(public)/page.tsx
 
-const HERO_LINE_ONE = 'Stop Guessing.';
+const HERO_LINE_ONE = 'Stop Planning.';
 const HERO_LINE_TWO = 'Start finishing.';
 const HERO_FULL_TEXT = `${HERO_LINE_ONE}${HERO_LINE_TWO}`;
 
