@@ -621,7 +621,7 @@ export default function FocusPage({
                   totalNodes={nodes.length}
                   completedCount={completedCount}
                   onMarkComplete={handleMarkComplete}
-                  onPause={handlePause}
+                  onPause={() => openPausePrompt('pause')}
                   onExplainStep={handleExplainStep}
                   isCompleting={isCompleting}
                   explanation={explanation}
