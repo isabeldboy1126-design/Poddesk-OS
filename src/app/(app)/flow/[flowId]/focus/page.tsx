@@ -352,9 +352,9 @@ export default function FocusPage({
         done_looks_like: (data.done_looks_like as string).trim(),
       });
       setUnstuckStage('result');
-    } catch (err) {
-      setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
-      setUnstuckStage('choice');
+    } catch {
+        setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
+        setUnstuckStage('choice');
     }
   }, [activeNode, flowId]);
 
