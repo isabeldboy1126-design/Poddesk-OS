@@ -9,6 +9,7 @@ interface OverrunPanelProps {
   estimatedMs: number;
   onGetUnstuck: () => void;
   onSkipForNow: () => void;
+  onClose: () => void;
 }
 
 export function OverrunPanel({
@@ -17,6 +18,7 @@ export function OverrunPanel({
   estimatedMs,
   onGetUnstuck,
   onSkipForNow,
+  onClose,
 }: OverrunPanelProps) {
   const { formattedTime, totalMs } = useTaskTimer({
     accumulatedMs,
@@ -32,7 +34,18 @@ export function OverrunPanel({
 
   return (
     <div className="w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-[#121A2F]/80 border border-[#2D3F5F]/50 rounded-2xl p-8 backdrop-blur-sm">
+      <div className="bg-[#121A2F]/80 border border-[#2D3F5F]/50 rounded-2xl p-8 backdrop-blur-sm relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+          aria-label="Close overrun panel"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
         {/* Header row */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2.5">

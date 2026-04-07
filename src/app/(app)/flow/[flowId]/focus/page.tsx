@@ -391,6 +391,11 @@ export default function FocusPage({
     handleMarkComplete();
   };
 
+  const handleCloseOverrun = () => {
+    overrunDismissedRef.current = true;
+    setFocusState('active');
+  };
+
   // ─── RENDER ───
 
   // Loading
@@ -487,6 +492,7 @@ export default function FocusPage({
             estimatedMs={activeNode.estimated_duration_ms || 0}
             onGetUnstuck={handleGetUnstuck}
             onSkipForNow={handleSkipForNow}
+            onClose={handleCloseOverrun}
           />
         </div>
       </FlowContainer>

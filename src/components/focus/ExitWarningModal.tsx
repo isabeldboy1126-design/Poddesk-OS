@@ -31,6 +31,17 @@ export function ExitWarningModal({
 
       {/* Modal */}
       <div className="relative z-10 w-full max-w-md mx-4 bg-[#121A2F] border border-[#2D3F5F]/60 rounded-2xl p-8 shadow-2xl shadow-black/40 animate-in fade-in zoom-in-95 duration-300">
+        <button
+          onClick={onStayFocused}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+          aria-label="Close exit warning"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
         {/* Warning icon */}
         <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-5">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
