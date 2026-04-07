@@ -318,7 +318,14 @@ export default function FocusPage({
         }),
       });
 
-      const data = (await res.json()) as Partial<UnstuckResponse>;
+      const data = (await res.json()) as Partial<UnstuckResponse> & { error?: string; details?: string };
+
+      if (!res.ok) {
+        const detail = [data.error, data.details].filter(Boolean).join(' ');
+        setUnstuckError(detail || 'Get Unstuck request failed.');
+        setUnstuckStage('choice');
+        return;
+      }
 
       const fields: Array<keyof UnstuckResponse> = [
         'what_is_blocking_you',
@@ -328,18 +335,12 @@ export default function FocusPage({
         'done_looks_like',
       ];
 
-      const isValid = res.ok && fields.every(
+      const isValid = fields.every(
         (k) => typeof data[k] === 'string' && (data[k] as string).trim().length > 0
       );
 
       if (!isValid) {
-        setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
-        setUnstuckStage('choice');
-        return;
-      }
-
-      if ((data.what_is_blocking_you as string).includes('Get Unstuck is unavailable right now')) {
-        setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
+        setUnstuckError('Malformed AI output: response did not match required schema.');
         setUnstuckStage('choice');
         return;
       }
@@ -352,8 +353,8 @@ export default function FocusPage({
         done_looks_like: (data.done_looks_like as string).trim(),
       });
       setUnstuckStage('result');
-    } catch {
-      setUnstuckError('Get Unstuck is unavailable right now. Try again in a moment.');
+    } catch (err) {
+      setUnstuckError((err as Error)?.message || 'Get Unstuck request failed.');
       setUnstuckStage('choice');
     }
   }, [activeNode, flowId]);

@@ -17,14 +17,6 @@ interface UnstuckResponse {
   done_looks_like: string;
 }
 
-const FALLBACK_UNSTUCK: UnstuckResponse = {
-  what_is_blocking_you: 'Get Unstuck is unavailable right now. Try again in a moment.',
-  do_this_now: 'Take one small concrete action on this task and retry Get Unstuck in a moment.',
-  smallest_possible_step: 'Open the exact file/tool needed and write the first two lines of the task output.',
-  avoid_this: 'Avoid switching tasks or rewriting the entire plan right now.',
-  done_looks_like: 'You have one concrete partial output saved that clearly moves this task forward.',
-};
-
 export async function POST(
   request: NextRequest,
   { params }: { params: { flowId: string } }
@@ -88,7 +80,10 @@ export async function POST(
         const { GoogleGenerativeAI } = await import('@google/generative-ai');
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-          return NextResponse.json(FALLBACK_UNSTUCK);
+          return NextResponse.json(
+            { error: 'GEMINI_API_KEY is not set on the server.' },
+            { status: 500 }
+          );
         }
 
         const client = new GoogleGenerativeAI(apiKey);
@@ -100,6 +95,17 @@ export async function POST(
             responseMimeType: 'application/json',
           },
         });
+
+        const contextPayload = {
+          flow_title: flow?.title || 'Untitled flow',
+          task_title: node.title,
+          task_description: node.description || 'No description provided',
+          done_definition: node.done_definition || 'No done definition provided',
+          milestone: node.milestone || 'No milestone provided',
+          estimated_duration_minutes: Math.round((node.estimated_duration_ms || 0) / 60000) || null,
+          userBlockType: validBlockType,
+          userContext: userContext?.trim() || null,
+        };
 
         const result = await model.generateContent([
           {
@@ -145,15 +151,7 @@ Return ONLY valid JSON in this exact schema:
 }`,
           },
           {
-            text: `flow_title: ${flow?.title || 'Untitled flow'}
-task_title: ${node.title}
-task_description: ${node.description || 'No description provided'}
-done_definition: ${node.done_definition || 'No done definition provided'}
-milestone: ${node.milestone || 'No milestone provided'}
-estimated_duration_minutes: ${Math.round((node.estimated_duration_ms || 0) / 60000) || 'Not provided'}
-userBlockType: ${validBlockType}
-userContext: ${userContext?.trim() || 'None'}
-`,
+            text: `TASK_CONTEXT_JSON:\n${JSON.stringify(contextPayload, null, 2)}`,
           },
         ]);
 
@@ -161,13 +159,22 @@ userContext: ${userContext?.trim() || 'None'}
         const parsed = parseUnstuckResponse(raw);
 
         if (!parsed) {
-          return NextResponse.json(FALLBACK_UNSTUCK);
+          return NextResponse.json(
+            {
+              error: 'Malformed AI output for Get Unstuck v2.',
+              details: `Could not parse strict schema from model output. Raw preview: ${raw.slice(0, 320)}`,
+            },
+            { status: 502 }
+          );
         }
 
         return NextResponse.json(parsed);
       } catch (unstuckErr) {
         console.error('Get Unstuck v2 API Error:', unstuckErr);
-        return NextResponse.json(FALLBACK_UNSTUCK);
+        return NextResponse.json(
+          { error: 'Get Unstuck v2 request failed.', details: (unstuckErr as Error).message || 'Unknown error' },
+          { status: 500 }
+        );
       }
     }
 
@@ -258,7 +265,11 @@ function parseUnstuckResponse(raw: string): UnstuckResponse | null {
       .replace(/```$/i, '')
       .trim();
 
-    const data = JSON.parse(cleaned) as Partial<UnstuckResponse>;
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    const candidate = start !== -1 && end > start ? cleaned.slice(start, end + 1) : cleaned;
+
+    const data = JSON.parse(candidate) as Partial<UnstuckResponse>;
 
     const fields: Array<keyof UnstuckResponse> = [
       'what_is_blocking_you',
