@@ -2,6 +2,20 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  const isPublicRoute =
+    pathname === '/' ||
+    pathname === '/login' ||
+    pathname === '/demo' ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next/') ||
+    pathname === '/favicon.ico';
+
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -43,12 +57,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/analytics/:path*',
-    '/history/:path*',
-    '/settings/:path*',
-    '/profile/:path*',
-    '/flow/:flowId/focus/:path*',
-    '/flow/:flowId/completion/:path*',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };
